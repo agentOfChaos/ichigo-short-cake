@@ -5,6 +5,9 @@ useragent = "Mozilla/5.0 (X11; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.
 req_cache = {}  # cache requests for performance
 
 def cachedGet(url, params, force_redo=False):
+    """
+    perform a get request. Successful requests are cached to reduce bandwidth
+    """
     ident = (url, params)
     if ident in req_cache.keys() and not force_redo:
         return req_cache[ident]
@@ -19,6 +22,9 @@ def cachedGet(url, params, force_redo=False):
     return req
 
 def uncachedHead(url, params):
+    """
+    head request, non cached
+    """
     req = requests.head(
         url,
         params=params,
@@ -28,6 +34,9 @@ def uncachedHead(url, params):
     return req
 
 def paranoidGet(url, params, timeout=30):
+    """
+    get request, non cached
+    """
     req = requests.get(
         url,
         params=params,

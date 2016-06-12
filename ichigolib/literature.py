@@ -1,4 +1,7 @@
 
+"""
+Support "dumb" data structures
+"""
 
 class Manga:
 
@@ -69,7 +72,6 @@ class Page:
         self.id = id
         self.baseurl = baseurl
         self.picurl = picurl
-        self.visited = False
         self.downloaded = False
 
     @property

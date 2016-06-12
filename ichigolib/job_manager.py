@@ -12,10 +12,16 @@ class Job(LogMaster):
         self.setLogger(self.__class__.__name__, loglevel)
 
     def execute(self):
+        """ function to be executed """
         pass
 
 
 class JobManager(LogMaster):
+    """
+    keeps a queue of jobs, and runs them in a separate thread, while keeping the number of worker thread under
+    a specified treshold.
+    it is not a real thread pool as new thread are fired every time
+    """
 
     def __init__(self, maxthreads, loglevel=logging.INFO):
         self.setLogger(self.__class__.__name__, loglevel)

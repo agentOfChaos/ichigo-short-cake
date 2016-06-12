@@ -16,6 +16,11 @@ from ichigolib.faultcounter import FaultCounter
 
 
 class SpiderJob(Job):
+    """
+    implements the Job interface;
+    scan a manga page for: 1) the actual image address 2) the link to the next page
+    then, schedules a job to download the picture, and a job to crawl the next page
+    """
 
     def __init__(self, chapter, pageurl, pageid, scanner, jobmanager, savelocation,
                  loglevel=logging.INFO, tolerance=20, ignore_incomplete=False, force=False):
@@ -73,6 +78,13 @@ class SpiderJob(Job):
 
 
 class PicDloadJob(Job):
+    """
+    implements the Job interface;
+    download an image, handling the cases when:
+    - the download cannot be completed no matter what
+    - the image was already downloaded
+    - the image was already downloaded (partially)
+    """
 
     def __init__(self, page, savelocation, loglevel=logging.INFO, tolerance=20, ignore_incomplete=False, force=False):
         super().__init__(loglevel=loglevel)
@@ -217,6 +229,7 @@ class MangaDownloader(LogMaster):
             exit(-1)
 
     def dl_report(self):
+        """ write a debug message to diagnose what images the program is trying to download at the moment """
         miselem = []
         mischap = self.manga.getIncompleteChapters()
         for mc in mischap:
@@ -227,7 +240,11 @@ class MangaDownloader(LogMaster):
         self.logger.debug("Missing: %s" % ", ".join(miselem))
 
     def runDownload(self):
+        """ begin the download procedure, and then wait until completion """
         scanner = self.scanBaseUrl()
+        if scanner is None:
+            self.logger.critical("No scanner implemented for this url")
+            exit(-1)
         self.prepareDirs()
         self.spiderPages(scanner)
         while True:
@@ -244,10 +261,15 @@ class MangaDownloader(LogMaster):
         self.finalWords()
 
     def scanBaseUrl(self):
+        """
+        match the baseurl with a manga-scanner, and fetch basic data as the title, and
+        a list of chapters
+        :return: scanner object
+        """
         (sname, scanner) = self.factory.getScanner(self.baseurl)
         if scanner is None:
             self.logger.error("No scanner implemented for %s" % self.baseurl)
-            return
+            return None
         self.logger.info("Scanner %s selected" % sname)
         title = scanner.getTitle(self.baseurl)
         self.manga = Manga(title, self.baseurl)
@@ -269,6 +291,7 @@ class MangaDownloader(LogMaster):
         return os.path.join(mangadir, chapter.getSaveName())
 
     def prepareDirs(self):
+        """ if needed, create the directory structure to hold the downloaded files """
         mangadir = os.path.join(os.path.expanduser(self.folder), slugify(self.manga.mangatitle, separator=" "))
         if not os.path.isdir(mangadir):
             os.makedirs(mangadir)
@@ -278,6 +301,7 @@ class MangaDownloader(LogMaster):
                 os.makedirs(chapterdir)
 
     def spiderPages(self, scanner):
+        """ for each chapter, start a spider job to crawl its first page """
         for chapter in self.manga.chapters:
             chapterdir = self.getChapterDir(chapter)
             if os.path.isdir(chapterdir) and self.update:

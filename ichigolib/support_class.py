@@ -1,5 +1,8 @@
 import logging, sys
 
+"""
+Utility code
+"""
 
 class LogMaster:
     def setLogger(self, name, loglevel):
