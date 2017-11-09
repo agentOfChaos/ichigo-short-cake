@@ -10,10 +10,13 @@ from ichigolib.literature import Chapter
 
 class MangaHereScanner(BaseScanner):
 
+    # warning: incomplete, do not use!
+
     urlmatcher = re.compile("http:\/\/www\.mangahere\.co\/manga\/([^\/]+)\/")
 
     def __init__(self, loglevel=logging.INFO):
         super().__init__(loglevel)
+        self.pagebaseurl = ""
 
     def doesApply(self, baseurl):
         return self.urlmatcher.match(baseurl) is not None
@@ -51,12 +54,15 @@ class MangaHereScanner(BaseScanner):
             chapters.append(self.extractChapter(manga.mangatitle, li, id))
         return chapters
 
+    def setPageBaseUrl(self, pagebaseurl):
+        self.pagebaseurl = pagebaseurl
+
     def getNextPage(self, currentpageurl):
         pagehtml = cachedGet(currentpageurl, None).text
         soup = BeautifulSoup(pagehtml, "html.parser")
         viewer = list(soup.find_all("section", attrs={"id": "viewer"}))[0]
         a = list(viewer.find_all("a"))[0]
-        return a["href"]
+        return self.pagebaseurl + a["href"]
 
     def getImageUrl(self, currentpageurl):
         pagehtml = cachedGet(currentpageurl, None).text

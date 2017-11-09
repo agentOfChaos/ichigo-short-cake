@@ -275,6 +275,7 @@ class MangaDownloader(LogMaster):
         self.manga = Manga(title, self.baseurl)
         self.logger.info("Found manga \"%s\"" % title)
         chapters = scanner.getChapterList(self.manga)
+        scanner.setPageBaseUrl(self.baseurl)
         self.manga.chapters = chapters
         for chapter in chapters:
             newstring = ""

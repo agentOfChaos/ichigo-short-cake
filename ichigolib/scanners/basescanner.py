@@ -24,6 +24,10 @@ class BaseScanner(LogMaster):
         """ :return: the manga chapter list, from the manga's details page """
         return []
 
+    def setPageBaseUrl(self, pagebaseurl):
+        """ (optional) sets the base-url, in case the next-page link in the page is relative only """
+        pass
+
     def getNextPage(self, currentpageurl):
         """ :return: the url of the next page, given the url of the current page """
         return ""
